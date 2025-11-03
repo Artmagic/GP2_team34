@@ -6,10 +6,8 @@ import json
 
 url = "https://api.cian.ru/search-offers/v2/search-offers-desktop/"
 
-# === 2. ТВОИ cookies (вставь из браузера!) ===
 COOKIES = "frontend_session_id=abc123xyz; device_id=xyz098abc; session_region_id=1"
 
-# === 3. Заголовки ===
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
                   "AppleWebKit/537.36 (KHTML, like Gecko) "
@@ -23,7 +21,6 @@ headers = {
     "Cookie": COOKIES,
 }
 
-# === 4. Получение одной страницы ===
 def get_page(page_num):
     payload = {
         "jsonQuery": {
@@ -42,7 +39,6 @@ def get_page(page_num):
     r.raise_for_status()
     return r.json()
 
-# === 5. Извлечение данных из ответа ===
 def parse_offers(data):
     offers = []
     for offer in data.get("data", {}).get("offersSerialized", []):
@@ -62,7 +58,6 @@ def parse_offers(data):
         offers.append(info)
     return offers
 
-# === 6. Основной цикл ===
 all_offers = []
 
 for page in tqdm(range(1, 259)):  # 258 страниц
@@ -74,14 +69,13 @@ for page in tqdm(range(1, 259)):  # 258 страниц
         # сохраняем каждые 20 страниц
         if page % 20 == 0:
             pd.DataFrame(all_offers).to_csv("cian_offices_temp.csv", index=False, encoding="utf-8-sig")
-            print(f"💾 Сохранено промежуточно: {len(all_offers)} объявлений")
+            print(f"Сохранено: {len(all_offers)} объявлений")
 
         time.sleep(1.5)
     except Exception as e:
-        print(f"⚠️ Ошибка на странице {page}: {e}")
+        print(f"Ошибка на странице {page}: {e}")
         time.sleep(3)
 
-# === 7. Финальное сохранение ===
 df = pd.DataFrame(all_offers)
 df.to_csv("cian_offices.csv", index=False, encoding="utf-8-sig")
-print(f"✅ Готово! Сохранено {len(df)} объявлений")
+print(f"Сохранено {len(df)} объявлений")
